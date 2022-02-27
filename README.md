@@ -188,3 +188,4 @@ I've verified that SAM works on a simple WRN 16-8 model run on CIFAR10; you can 
 | SGD + momentum        |   3.20 % |
 | SAM + SGD + momentum  |   2.86 % |
 | ASAM + SGD + momentum |   2.55 % |
+| GSAM                  |   2.45 % | 
