@@ -16,7 +16,7 @@ class GSAM(torch.optim.Optimizer):
 
     @torch.no_grad()
     def perturb_weights(self, rho=0.0):
-        grad_norm = self._grad_norm()
+        grad_norm = self._grad_norm( weight_adaptive = self.adaptive )
         for group in self.param_groups:
             scale = rho / (grad_norm + self.perturb_eps)
 
@@ -25,7 +25,7 @@ class GSAM(torch.optim.Optimizer):
                 self.state[p]["old_g"] = p.grad.data.clone()
                 e_w = p.grad * scale.to(p)
                 if self.adaptive:
-                    e_w *= torch.abs(p)
+                    e_w *= torch.pow(p, 2)
                 p.add_(e_w)  # climb to the local maximum "w + e(w)"
                 self.state[p]['e_w'] = e_w
 
@@ -59,12 +59,12 @@ class GSAM(torch.optim.Optimizer):
                     torch.distributed.all_reduce(p.grad)
 
     @torch.no_grad()
-    def _grad_norm(self, by=None):
+    def _grad_norm(self, by=None, weight_adaptive=False):
         #shared_device = self.param_groups[0]["params"][0].device  # put everything on the same device, in case of model parallelism
         if not by:
             norm = torch.norm(
                     torch.stack([
-                        ( p.grad).norm(p=2)
+                        ( (torch.abs(p.data) if weight_adaptive else 1.0) *  p.grad).norm(p=2)
                         for group in self.param_groups for p in group["params"]
                         if p.grad is not None
                     ]),
@@ -73,7 +73,7 @@ class GSAM(torch.optim.Optimizer):
         else:
             norm = torch.norm(
                 torch.stack([
-                    (self.state[p][by]).norm(p=2)
+                    ( (torch.abs(p.data) if weight_adaptive else 1.0) * self.state[p][by]).norm(p=2)
                     for group in self.param_groups for p in group["params"]
                     if p.grad is not None
                 ]),
