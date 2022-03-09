@@ -46,9 +46,10 @@ class PolyScheduler(SchedulerBase):
     def __init__(self, poly_order=-0.5, *args, **kwargs):
         super(PolyScheduler, self).__init__(*args, **kwargs)
         self.poly_order = poly_order
+        assert poly_order<=0, "Please check poly_order<=0 so that the scheduler decreases with steps"
 
     def step_func(self):
-        value = self.max_value + (self.min_value-self.max_value) * (self.t - self.warmup_steps)**self.poly_order
+        value = self.min_value + (self.max_value-self.min_value) * (self.t - self.warmup_steps)**self.poly_order
         return value
 
 
