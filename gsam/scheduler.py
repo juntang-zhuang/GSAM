@@ -48,7 +48,7 @@ class PolyScheduler(SchedulerBase):
         self.poly_order = poly_order
 
     def step_func(self):
-        value = self.min_value + (self.max_value-self.min_value) * (self.t - self.warmup_steps)**self.poly_order
+        value = self.max_value + (self.min_value-self.max_value) * (self.t - self.warmup_steps)**self.poly_order
         return value
 
 
