@@ -11,4 +11,4 @@ Disclaimer: original code (during internship at Google) was in jax and tensorflo
 | SGD + momentum        |   3.20 % |
 | SAM + SGD + momentum  |   2.86 % |
 | ASAM + SGD + momentum |   2.55 % |
-| GSAM                  |   2.45 % | 
+| GSAM + SGD + momentum |   2.45 % | 
