@@ -19,7 +19,7 @@ Acknowledgement: This repository is based on https://github.com/davda54/sam
 ![](img/gsam_algo.png)
 ![](img/gsam_results.png)
 ## How to use GSAM in code
-For readability the essential code is marked in green (at a cost of an extra "+" sign at the beginning of line). Please ignore the beginning "+" when using GSAM in your project.
+For readability the essential code is marked in green (at a cost of an extra "+" sign at the beginning of line). Please ignore the beginning "+" when using GSAM in your project. Each step of code is marked with notes on the meaning, please read before using.
 
 ```diff
 # import GSAM class and scheduler
@@ -45,7 +45,7 @@ for batch in dataset.train:
     
     # Step 4): Define loss function, so that loss_fn only takes two inputs (predictions, targets), and outputs a scalar valued loss.
     # If you have auxialliary parameters e.g. arg1, arg2, arg3 ..., please define as:
-    #           loss_fn = lambda predictions, targets: original_loss_func(predictions, targets, arg1=arg1, arg2=arg2, ...)
+    #           loss_fn = lambda predictions, targets: original_loss_func(predictions, targets, arg1=arg1, arg2=arg2, arg3=arg3 ...)
     
 +   def loss_fn(predictions, targets):
 +       return smooth_crossentropy(predictions, targets, smoothing=args.label_smoothing).mean()
