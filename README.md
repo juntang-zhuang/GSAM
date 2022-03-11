@@ -64,9 +64,9 @@ for batch in dataset.train:
     
 +   predictions, loss = gsam_optimizer.step()
 
-    # Step 7): Upate lr
-    # Note: since rho_scheduler.step() is called internally in GSAM.step(), it's important to update lr so that rho_t and lr evolve proportionally.
+    # Step 7): Upate lr and rho_t
 +   lr_scheduler.step()
++   gsam_optimizer.rho_scheduler.step()
 # ============================================================================================
 ```
 
