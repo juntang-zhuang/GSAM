@@ -17,8 +17,10 @@ class SchedulerBase:
         self.optimizer = optimizer
 
     def step(self):
-        if self.t <= self.warmup_steps:
+        if self.t < self.warmup_steps:
             value = self.init_value + (self.max_value - self.init_value) * self.t / self.warmup_steps
+        elif self.t == self.warmup_steps:
+            value = self.max_value
         else:
             value = self.step_func()
         self.t += 1
