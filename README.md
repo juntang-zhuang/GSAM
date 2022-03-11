@@ -28,7 +28,9 @@ from gsam import GSAM, LinearScheduler
 # Step 0): set up base optimizer, e.g. SGD, Adam, AdaBelief ...
 +base_optimizer = torch.optim.SGD(model.parameters(), lr=args.learning_rate, momentum=args.momentum, weight_decay=args.weight_decay)
 
-# Step 1): set up learning rate scheduler
+# Step 1): set up learning rate scheduler. 
+# If you pass base_optimizer to lr_scheduler, lr_scheduler.step() will update lr for all trainable parameters in base_optimizer. 
+# Otherwise, it only returns the value, and you need to manually assign lr to parameters in base_optimizer.
 +lr_scheduler = LinearScheduler(T_max=args.epochs*len(dataset.train), max_value=args.learning_rate, min_value=args.learning_rate*0.01, optimizer=base_optimizer)
 
 # Step 2): set up rho_t scheduler. 
