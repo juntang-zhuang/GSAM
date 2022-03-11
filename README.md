@@ -66,7 +66,7 @@ for batch in dataset.train:
 
     # Step 7): Upate lr and rho_t
 +   lr_scheduler.step()
-+   gsam_optimizer.rho_scheduler.step()
++   gsam_optimizer.update_rho_t()
 # ============================================================================================
 ```
 
