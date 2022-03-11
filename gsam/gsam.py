@@ -13,6 +13,9 @@ class GSAM(torch.optim.Optimizer):
         self.rho_scheduler = rho_scheduler
         self.perturb_eps = perturb_eps
         self.alpha = gsam_alpha
+        
+        # initialize self.rho_t
+        self.rho_t = self.rho_scheduler.step()
 
     @torch.no_grad()
     def perturb_weights(self, rho=0.0):
@@ -122,7 +125,7 @@ class GSAM(torch.optim.Optimizer):
         outputs, loss_value = get_grad()
 
         # perturb weights
-        self.perturb_weights(rho=self.rho_scheduler.step())
+        self.perturb_weights(rho=self.rho_t)
 
         # disable running stats for second pass
         disable_running_stats(self.model)
