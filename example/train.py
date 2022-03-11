@@ -78,7 +78,7 @@ if __name__ == "__main__":
                 correct = torch.argmax(predictions.data, 1) == targets
                 log(model, loss.cpu().repeat(args.batch_size), correct.cpu(), scheduler.lr())
                 scheduler(epoch)
-                optimizer.rho_scheduler.step()
+                optimizer.update_rho_t()
 
         model.eval()
         log.eval(len_dataset=len(dataset.test))
