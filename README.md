@@ -35,7 +35,7 @@ from gsam import GSAM, LinearScheduler
 +rho_scheduler = LinearScheduler(T_max=args.epochs*len(dataset.train), max_value=args.rho_max, min_value=args.rho_min)
 
 # Step 3): configure GSAM
-+optimizer = GSAM(params=model.parameters(), base_optimizer=base_optimizer, model=model, gsam_alpha=args.alpha, rho_scheduler=rho_scheduler, adaptive=args.adaptive)
++gsam_optimizer = GSAM(params=model.parameters(), base_optimizer=base_optimizer, model=model, gsam_alpha=args.alpha, rho_scheduler=rho_scheduler, adaptive=args.adaptive)
 
 # ============================================================================================
 # training loop
@@ -54,7 +54,7 @@ for batch in dataset.train:
     #            predictions = model(inputs), loss = loss_fn(predictions, targets), loss.backward()
     # Note: need to set_closure for each (inputs, targets) pair
     
-+   optimizer.set_closure(loss_fn, inputs, targets)
++   gsam_optimizer.set_closure(loss_fn, inputs, targets)
     
     # Step 6): Update model parameters. 
     # optimizer.step() internally does the following: 
@@ -62,7 +62,7 @@ for batch in dataset.train:
     #            (g) decompose gradients and update gradients (h) apply new gradients with base_optimizer
     # Note: zero_grad is called internally for every step of GSAM.step(), gradient accumulation is currently not supported
     
-+   predictions, loss = optimizer.step()
++   predictions, loss = gsam_optimizer.step()
 
     # Step 7): Upate lr
     # Note: since rho_scheduler.step() is called internally in GSAM.step(), it's important to update lr so that rho_t and lr evolve proportionally.
