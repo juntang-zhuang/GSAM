@@ -15,7 +15,12 @@ class GSAM(torch.optim.Optimizer):
         self.alpha = gsam_alpha
         
         # initialize self.rho_t
+        self.update_rho_t()
+    
+    @torch.no_grad():
+    def update_rho_t(self):
         self.rho_t = self.rho_scheduler.step()
+        return self.rho_t
 
     @torch.no_grad()
     def perturb_weights(self, rho=0.0):
