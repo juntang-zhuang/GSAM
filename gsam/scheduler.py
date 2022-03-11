@@ -11,6 +11,9 @@ class SchedulerBase:
         self.init_value = init_value
         self.warmup_steps = warmup_steps
         self.total_steps = T_max
+        
+        # If optimizer is not None, will set learning rate to all trainable parameters in optimizer.
+        # If optimizer is None, only output the value of lr.
         self.optimizer = optimizer
 
     def step(self):
