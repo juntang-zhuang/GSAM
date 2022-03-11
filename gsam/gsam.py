@@ -17,7 +17,7 @@ class GSAM(torch.optim.Optimizer):
         # initialize self.rho_t
         self.update_rho_t()
     
-    @torch.no_grad():
+    @torch.no_grad()
     def update_rho_t(self):
         self.rho_t = self.rho_scheduler.step()
         return self.rho_t
