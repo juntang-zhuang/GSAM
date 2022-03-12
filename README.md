@@ -19,7 +19,7 @@ Acknowledgement: This repository is based on https://github.com/davda54/sam
 ![](img/gsam_algo.png)
 ![](img/gsam_results.png)
 ## How to use GSAM in code
-For readability the essential code is marked in green (at a cost of an extra "+" sign at the beginning of line). Please ignore the beginning "+" when using GSAM in your project. Each step of code is marked with notes, please read before using.
+For readability the essential code is highlighted (at a cost of an extra "+" sign at the beginning of line). Please ignore the beginning "+" when using GSAM in your project. Each step of code is marked with notes, please read before using.
 
 ```diff
 # import GSAM class and scheduler
