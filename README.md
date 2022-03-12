@@ -93,6 +93,9 @@ rho_scheduler = CosineScheduler(T_max=args.epochs*len(dataset.train), max_value=
 This is used in ```example/train.py```, the lr scheduler is a StepScheduler (to match previous results by https://github.com/davda54/sam ),
 the rho_t sheduler is a linear decayed scheduler. lr and rho_t do not decay proportionally.
 
+## Case 3 (write your own scheduler)
+You can also write your own shceduler by inherit ```gsam.scheduler.SchedulerBase``` class and define ```step_func```.
+
 ## Citation
 ```
 @inproceedings{
