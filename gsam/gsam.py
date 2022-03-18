@@ -36,6 +36,12 @@ class GSAM(torch.optim.Optimizer):
                     e_w *= torch.pow(p, 2)
                 p.add_(e_w)  # climb to the local maximum "w + e(w)"
                 self.state[p]['e_w'] = e_w
+                
+    @torch.no_grad()
+    def unperturb(self):
+        for group in self.param_groups:
+            for p in group['params']:
+                p.data.sub_(self.state[p]['e_w'])
 
     @torch.no_grad()
     def gradient_decompose(self, alpha=0.0):
@@ -61,7 +67,6 @@ class GSAM(torch.optim.Optimizer):
                 if p.grad is None: continue
                 vertical = self.state[p]['old_g'] - cosine * old_grad_norm * p.grad.data / (new_grad_norm + self.perturb_eps)
                 p.grad.data.add_( vertical, alpha=-alpha)
-                p.data.sub_(self.state[p]['e_w'])
 
                 if torch.distributed.is_initialized(): # synchronize final gardients
                     torch.distributed.all_reduce(p.grad)
@@ -140,6 +145,9 @@ class GSAM(torch.optim.Optimizer):
 
         # decompose and get new update direction
         self.gradient_decompose(self.alpha)
+        
+        # unperturb
+        self.unperturb()
 
         # update with new directions
         self.base_optimizer.step()
