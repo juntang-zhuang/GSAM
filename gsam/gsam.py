@@ -1,9 +1,10 @@
 import torch
 from .util import enable_running_stats, disable_running_stats
 import contextlib
+from torch.distributed import ReduceOp
 
 class GSAM(torch.optim.Optimizer):
-    def __init__(self, params, base_optimizer, model, gsam_alpha, rho_scheduler, adaptive=False, perturb_eps=1e-12, **kwargs):
+    def __init__(self, params, base_optimizer, model, gsam_alpha, rho_scheduler, adaptive=False, perturb_eps=1e-12, grad_reduce='mean' **kwargs):
         defaults = dict(adaptive=adaptive, **kwargs)
         super(GSAM, self).__init__(params, defaults)
         self.model = model
@@ -16,6 +17,14 @@ class GSAM(torch.optim.Optimizer):
         
         # initialize self.rho_t
         self.update_rho_t()
+        
+        # set up reduction for gradient across workers
+        if grad_reduce.lower() == 'mean':
+            self.grad_reduce = ReduceOp.AVG
+        elif grad_reduce.lower() == 'sum':
+            self.grad_reduce = ReduceOp.SUM
+        else:
+            raise ValueError('"grad_reduce" should be one of ["mean", "sum"].')
     
     @torch.no_grad()
     def update_rho_t(self):
@@ -41,7 +50,8 @@ class GSAM(torch.optim.Optimizer):
     def unperturb(self):
         for group in self.param_groups:
             for p in group['params']:
-                p.data.sub_(self.state[p]['e_w'])
+                if 'e_w' in self.state[p].keys():
+                    p.data.sub_(self.state[p]['e_w'])
 
     @torch.no_grad()
     def gradient_decompose(self, alpha=0.0):
@@ -69,7 +79,7 @@ class GSAM(torch.optim.Optimizer):
                 p.grad.data.add_( vertical, alpha=-alpha)
 
                 if torch.distributed.is_initialized(): # synchronize final gardients
-                    torch.distributed.all_reduce(p.grad)
+                    torch.distributed.all_reduce(p.grad, op=self.grad_reduce)
 
     @torch.no_grad()
     def _grad_norm(self, by=None, weight_adaptive=False):
