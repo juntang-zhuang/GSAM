@@ -20,9 +20,15 @@ class GSAM(torch.optim.Optimizer):
         
         # set up reduction for gradient across workers
         if grad_reduce.lower() == 'mean':
-            self.grad_reduce = ReduceOp.AVG
+            if hasattr(ReduceOp, 'AVG'):
+                self.grad_reduce = ReduceOp.AVG
+                self.manual_average = False
+            else: # PyTorch <= 1.11.0 does not have AVG, need to manually average across processes
+                self.grad_reduce = ReduceOp.SUM
+                self.manual_average = True
         elif grad_reduce.lower() == 'sum':
             self.grad_reduce = ReduceOp.SUM
+            self.manual_average = False
         else:
             raise ValueError('"grad_reduce" should be one of ["mean", "sum"].')
     
@@ -79,7 +85,12 @@ class GSAM(torch.optim.Optimizer):
                 p.grad.data.add_( vertical, alpha=-alpha)
 
                 if torch.distributed.is_initialized(): # synchronize final gardients
-                    torch.distributed.all_reduce(p.grad, op=self.grad_reduce)
+                    if self.manual_average:
+                        torch.distributed.all_reduce(p.grad, op=self.grad_reduce)
+                        world_size = torch.distributed.get_world_size()
+                        p.grad.div_(float(world_size))
+                    else:
+                        torch.distributed.all_reduce(p.grad, op=self.grad_reduce)
 
     @torch.no_grad()
     def _grad_norm(self, by=None, weight_adaptive=False):
