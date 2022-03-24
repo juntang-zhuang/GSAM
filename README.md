@@ -7,7 +7,7 @@ Disclaimer: original code (during internship at Google) was in jax and tensorflo
 Acknowledgement: This repository is based on https://github.com/davda54/sam 
 
 ## (Potentially) Unresolved issues with PyTorch code
-Since the SAM family works best when **each worker has its own gradient and weight puerturbation**, but in DataParallel mode in PyTorch the gradient is synchronized across workers hence perturbation is also synchronized across workers.
+Since the SAM family works best when```each worker has its own (different) gradient and weight puerturbation```, but in DataParallel mode in PyTorch the gradient is synchronized across workers hence perturbation is also synchronized across workers.
 
 In order to let each worker use its own gradient, I use ```model.no_sync()``` in the [code](https://github.com/juntang-zhuang/GSAM/blob/7970892956b9159fe5eb1f304f9f956d5b6a8d5f/gsam/gsam.py#L129). However, I'm not sure if ```model.no_sync()``` only works in ```DistributedDataParallel``` mode rather than ```DataParallel``` mode. 
 
