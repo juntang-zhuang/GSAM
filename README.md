@@ -110,7 +110,7 @@ lr_scheduler = CosineAnnealingLR(optimizer=base_optimizer, T_max=args.epochs*len
 rho_scheduler = ProportionScheduler(pytorch_lr_scheduler=lr_scheduler, max_lr=args.learning_rate, min_lr=args.learning_rate*0.01, max_value=args.rho_max, min_value=args.rho_min)
 ```
 
-### Case 2 (used in this toy repo) 
+### Case 2 (used in this toy repo, not recommended for large-scale experiments) 
 This is used in ```example/train.py```, the lr scheduler is a StepScheduler (to match previous results by https://github.com/davda54/sam ),
 the rho_t sheduler is a linear decayed scheduler. lr and rho_t do not decay proportionally.
 
