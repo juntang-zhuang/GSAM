@@ -84,6 +84,11 @@ class GSAM(torch.optim.Optimizer):
                 vertical = self.state[p]['old_g'] - cosine * old_grad_norm * p.grad.data / (new_grad_norm + self.perturb_eps)
                 p.grad.data.add_( vertical, alpha=-alpha)
 
+    @torch.no_grad()
+    def _sync_grad(self):
+        for group in self.param_groups:
+            for p in group['params']:
+                if p.grad is None: continue
                 if torch.distributed.is_initialized(): # synchronize final gardients
                     if self.manual_average:
                         torch.distributed.all_reduce(p.grad, op=self.grad_reduce)
@@ -91,6 +96,7 @@ class GSAM(torch.optim.Optimizer):
                         p.grad.div_(float(world_size))
                     else:
                         torch.distributed.all_reduce(p.grad, op=self.grad_reduce)
+        return
 
     @torch.no_grad()
     def _grad_norm(self, by=None, weight_adaptive=False):
@@ -118,6 +124,12 @@ class GSAM(torch.optim.Optimizer):
     def load_state_dict(self, state_dict):
         super().load_state_dict(state_dict)
         self.base_optimizer.param_groups = self.param_groups
+        
+    def maybe_no_sync(self):
+        if torch.distributed.is_initialized():
+            return self.model.no_sync()
+        else:
+            return contextlib.ExitStack()
 
     @torch.no_grad()
     def set_closure(self, loss_fn, inputs, targets, **kwargs):
@@ -126,20 +138,13 @@ class GSAM(torch.optim.Optimizer):
         # This function does not take any arguments, and the inputs and targets data
         # should be pre-set in the definition of partial-function
 
-        def maybe_no_sync():
-            if torch.distributed.is_initialized():
-                return self.model.no_sync()
-            else:
-                return contextlib.ExitStack()
-
         def get_grad():
             self.base_optimizer.zero_grad()
-            with maybe_no_sync():
-                with torch.enable_grad():
-                    outputs = self.model(inputs)
-                    loss = loss_fn(outputs, targets, **kwargs)
-                loss_value = loss.data.clone().detach()
-                loss.backward()
+            with torch.enable_grad():
+                outputs = self.model(inputs)
+                loss = loss_fn(outputs, targets, **kwargs)
+            loss_value = loss.data.clone().detach()
+            loss.backward()
             return outputs, loss_value
 
         self.forward_backward_func = get_grad
@@ -152,23 +157,27 @@ class GSAM(torch.optim.Optimizer):
         else:
             get_grad = self.forward_backward_func
 
-        # get gradient
-        outputs, loss_value = get_grad()
+        with self.maybe_no_sync():
+            # get gradient
+            outputs, loss_value = get_grad()
 
-        # perturb weights
-        self.perturb_weights(rho=self.rho_t)
+            # perturb weights
+            self.perturb_weights(rho=self.rho_t)
 
-        # disable running stats for second pass
-        disable_running_stats(self.model)
+            # disable running stats for second pass
+            disable_running_stats(self.model)
 
-        # get gradient at perturbed weights
-        get_grad()
+            # get gradient at perturbed weights
+            get_grad()
 
-        # decompose and get new update direction
-        self.gradient_decompose(self.alpha)
-        
-        # unperturb
-        self.unperturb()
+            # decompose and get new update direction
+            self.gradient_decompose(self.alpha)
+
+            # unperturb
+            self.unperturb()
+            
+        # synchronize gradients across workers
+        self._sync_grad()    
 
         # update with new directions
         self.base_optimizer.step()
