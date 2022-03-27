@@ -90,13 +90,24 @@ learning rate,
 ```(lr - lr_min) / (lr_max - lr_min) = (rho - rho_min) / (rho_max - rho_min)```
 
 Example to use the same type of scheduler for rho and lr:
+#### Method 1.1) Call the same Scheduler class twice for lr_scheduler and rho_scheduler
 ```
+from gsam.scheduler import LinearScheduler
 lr_scheduler = LinearScheduler(T_max=args.epochs*len(dataset.train), max_value=args.learning_rate, min_value=args.learning_rate*0.01, optimizer=base_optimizer, warmup_step=2000)
 rho_scheduler = LinearScheduler(T_max=args.epochs*len(dataset.train), max_value=args.rho_max, min_value=args.rho_min, warmup_step=2000)
 ```
 ```
+from gsam.scheduler import CosineScheduler
 lr_scheduler = CosineScheduler(T_max=args.epochs*len(dataset.train), max_value=args.learning_rate, min_value=args.learning_rate*0.01, optimizer=base_optimizer, warmup_step=2000)
 rho_scheduler = CosineScheduler(T_max=args.epochs*len(dataset.train), max_value=args.rho_max, min_value=args.rho_min, warmup_step=2000)
+```
+#### Method 1.2) Create an lr_scheduler from torch.optim.lr_scheduler, then call gsam.scheduler.ProportionScheduler
+```
+from torch.optim.lr_scheduler import CosineAnnealingLR
+from gsam.scheduler import ProportionScheduler
+base_optimizer = torch.optim.SGD(model.parameters(), lr=args.learning_rate)
+lr_scheduler = CosineAnnealingLR(optimizer=base_optimizer, T_max=args.epochs*len(dataset.train), eta_min=args.learning_rate*0.01)
+rho_scheduler = ProportionScheduler(pytorch_lr_scheduler=lr_scheduler, max_lr=args.learning_rate, min_lr=args.learning_rate*0.01, max_value=args.rho_max, min_value=args.rho_min)
 ```
 
 ### Case 2 (used in this toy repo) 
