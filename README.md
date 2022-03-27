@@ -28,7 +28,7 @@ Please feel free to create a PR if you are an expert on this.
 ![](img/gsam_algo.png)
 ![](img/gsam_results.png)
 ## How to use GSAM in code
-For readability the essential code is highlighted (at a cost of an extra "+" sign at the beginning of line). Please ignore the beginning "+" when using GSAM in your project. Each step of code is marked with notes, please read before using.
+For readability the essential code is highlighted (at a cost of an extra "+" sign at the beginning of line). Please ***remove the beginning "+"*** when using GSAM in your project. Each step of code is marked with notes, please read before using.
 
 ```diff
 # import GSAM class and scheduler
@@ -40,6 +40,7 @@ from gsam import GSAM, LinearScheduler
 # Step 1): set up learning rate scheduler. 
 # If you pass base_optimizer to lr_scheduler, lr_scheduler.step() will update lr for all trainable parameters in base_optimizer. 
 # Otherwise, it only returns the value, and you need to manually assign lr to parameters in base_optimizer.
+# Currently LinearScheduler, CosineScheduler and PolyScheduler are implemented, all have support for warmup and user-specified min value.
 +lr_scheduler = LinearScheduler(T_max=args.epochs*len(dataset.train), max_value=args.learning_rate, min_value=args.learning_rate*0.01, optimizer=base_optimizer)
 
 # Step 2): set up rho_t scheduler. 
