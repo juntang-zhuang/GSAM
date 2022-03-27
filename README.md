@@ -115,7 +115,8 @@ This is used in ```example/train.py```, the lr scheduler is a StepScheduler (to 
 the rho_t sheduler is a linear decayed scheduler. lr and rho_t do not decay proportionally.
 
 ### Case 3 (write your own scheduler)
-You can also write your own shceduler by inherit ```gsam.scheduler.SchedulerBase``` class and define ```step_func```.
+1) You can also write your own shceduler by inherit ```gsam.scheduler.SchedulerBase``` class and define ```step_func```.
+2) You can write your own lr scheduler by inheriting ```torch.optim.lr_scheduler._LRScheduler```, or combining several schedulers using ```torch.optim.lr_scheduler.SequentialLR```. After creating your own lr_scheduler, call ```gsam.ProportionScheduler```.
 
 ## Citation
 ```
