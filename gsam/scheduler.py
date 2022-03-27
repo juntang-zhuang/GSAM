@@ -2,6 +2,34 @@
 import math
 import numpy as np
 
+class ProportionScheduler:
+    def __init__(self, pytorch_lr_scheduler, max_lr, min_lr, max_value, min_value):
+        """
+        This scheduler outputs a value that evolves proportional to pytorch_lr_scheduler, e.g.
+        (value - min_value) / (max_value - min_value) = (lr - min_lr) / (max_lr - min_lr)
+        """
+        self.t = 0    
+        self.pytorch_lr_scheduler = pytorch_lr_scheduler
+        self.max_lr = max_lr
+        self.min_lr = min_lr
+        self.max_value = max_value
+        self.min_value = min_value
+        
+        assert (max_lr > min_lr) or ((max_lr==min_lr) and (max_value==min_value)), "Current scheduler for `value` is scheduled to evolve proportionally to `lr`," \ 
+        "e.g. `(lr - min_lr) / (max_lr - min_lr) = (value - min_value) / (max_value - min_value)`. Please check `max_lr >= min_lr` and `max_value >= min_value`;" \
+        "if `max_lr==min_lr` hence `lr` is constant with step, please set 'max_value == min_value' so 'value' is constant with step."
+    
+        assert max_value >= min_value
+        
+    def step(self):
+        self.t += 1
+        lr = self.pytorch_lr_scheduler.get_last_lr()
+        if self.max_lr > self.min_lr:
+            value = self.min_value + (self.max_value - self.min_value) * (lr - self.min_lr) / (self.max_lr - self.min_lr)
+        else:
+            value = self.max_value
+        return value
+        
 class SchedulerBase:
     def __init__(self, T_max, max_value, min_value=0.0, init_value=0.0, warmup_steps=0, optimizer=None):
         super(SchedulerBase, self).__init__()
