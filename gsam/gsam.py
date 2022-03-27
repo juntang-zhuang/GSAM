@@ -86,10 +86,10 @@ class GSAM(torch.optim.Optimizer):
 
     @torch.no_grad()
     def _sync_grad(self):
-        for group in self.param_groups:
-            for p in group['params']:
-                if p.grad is None: continue
-                if torch.distributed.is_initialized(): # synchronize final gardients
+        if torch.distributed.is_initialized(): # synchronize final gardients
+            for group in self.param_groups:
+                for p in group['params']:
+                    if p.grad is None: continue
                     if self.manual_average:
                         torch.distributed.all_reduce(p.grad, op=self.grad_reduce)
                         world_size = torch.distributed.get_world_size()
