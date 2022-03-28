@@ -3,7 +3,6 @@ class StepLR:
         self.optimizer = optimizer
         self.total_epochs = total_epochs
         self.base = learning_rate
-        self._last_lr = []
 
     def __call__(self, epoch):
         if epoch < self.total_epochs * 3/10:
@@ -18,7 +17,7 @@ class StepLR:
         for param_group in self.optimizer.param_groups:
             param_group["lr"] = lr
         
-        self._last_lr = self.optimizer.param_groups[0]["lr"]
+        self._last_lr = [lr]
 
     def lr(self) -> float:
         return self.optimizer.param_groups[0]["lr"]
