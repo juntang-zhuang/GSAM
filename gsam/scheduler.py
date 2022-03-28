@@ -43,9 +43,7 @@ class SchedulerBase:
         self.init_value = init_value
         self.warmup_steps = warmup_steps
         self.total_steps = T_max
-        
-        self._last_lr = []
-        
+                
         # If optimizer is not None, will set learning rate to all trainable parameters in optimizer.
         # If optimizer is None, only output the value of lr.
         self.optimizer = optimizer
@@ -64,7 +62,7 @@ class SchedulerBase:
             for param_group in self.optimizer.param_groups:
                 param_group['lr'] = value
                 
-        self._last_lr[0] = value
+        self._last_lr = [value]
         return value
 
     def step_func(self):
