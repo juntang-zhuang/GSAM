@@ -32,6 +32,8 @@ class ProportionScheduler:
             value = self.min_value + (self.max_value - self.min_value) * (lr - self.min_lr) / (self.max_lr - self.min_lr)
         else:
             value = self.max_value
+        
+        self._last_lr = [value]
         return value
         
 class SchedulerBase:
