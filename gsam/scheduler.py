@@ -22,6 +22,9 @@ class ProportionScheduler:
         assert max_value >= min_value
         
         self.step() # take 1 step during initialization to get self._last_lr
+    
+    def lr(self):
+        return self._last_lr[0]
                 
     def step(self):
         self.t += 1
@@ -74,6 +77,9 @@ class SchedulerBase:
 
     def step_func(self):
         pass
+    
+    def lr(self):
+        return self._last_lr[0]
 
 class LinearScheduler(SchedulerBase):
     def step_func(self):
