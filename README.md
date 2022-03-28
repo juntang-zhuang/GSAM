@@ -15,15 +15,6 @@ In order to let each worker use its own gradient, I use ```model.no_sync()``` in
 I suppose the training script needs to be set as ```Distributed``` in order to replicate my experiments with Jax, but I have quite limited experimence with PyTorch distributed training.
 Please feel free to create a PR if you are an expert on this.
 
-## Experiments (from this repo on Cifar10)
-
-| Optimizer             | Test error rate |
-| :-------------------- |   -----: |
-| SGD + momentum        |   3.20 % |
-| SAM + SGD + momentum  |   2.86 % |
-| ASAM + SGD + momentum |   2.55 % |
-| GSAM + SGD + momentum |   2.45 % | 
-
 ## Algorithm and results on ImageNet in the paper
 ![](img/gsam_algo.png)
 ![](img/gsam_results.png)
