@@ -20,6 +20,8 @@ class ProportionScheduler:
         "if `max_lr==min_lr` hence `lr` is constant with step, please set 'max_value == min_value' so 'value' is constant with step."
     
         assert max_value >= min_value
+        
+        self.step() # take 1 step during initialization to get self._last_lr
                 
     def step(self):
         self.t += 1
