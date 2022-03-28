@@ -45,6 +45,9 @@ class SchedulerBase:
         self.init_value = init_value
         self.warmup_steps = warmup_steps
         self.total_steps = T_max
+        
+        # record current value in self._last_lr to match API from torch.optim.lr_scheduler
+        self._last_lr = [init_value]
                 
         # If optimizer is not None, will set learning rate to all trainable parameters in optimizer.
         # If optimizer is None, only output the value of lr.
