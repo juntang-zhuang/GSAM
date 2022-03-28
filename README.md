@@ -16,7 +16,7 @@ I suppose the training script needs to be set as ```Distributed``` in order to r
 Please feel free to create a PR if you are an expert on this.
 
 ## Algorithm and results on ImageNet in the paper
-![](img/gsam_algo.png)
+![](img/gsam_algo2.png)
 ![](img/gsam_results.png)
 ![](img/gsam_hyperparam.png)
 ## How to use GSAM in code
