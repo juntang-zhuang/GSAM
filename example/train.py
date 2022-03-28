@@ -11,7 +11,7 @@ from utility.bypass_bn import enable_running_stats, disable_running_stats
 
 import sys; sys.path.append("..")
 from sam import SAM
-from gsam import GSAM, LinearScheduler
+from gsam import GSAM, LinearScheduler, CosineScheduler
 
 
 if __name__ == "__main__":
@@ -46,8 +46,13 @@ if __name__ == "__main__":
     scheduler = StepLR(optimizer, args.learning_rate, args.epochs)
     '''
     base_optimizer = torch.optim.SGD(model.parameters(), lr=args.learning_rate, momentum=args.momentum, weight_decay=args.weight_decay)
-    scheduler = StepLR(base_optimizer, args.learning_rate, args.epochs)
-    rho_scheduler = LinearScheduler(T_max=args.epochs*len(dataset.train), max_value=args.rho_max, min_value=args.rho_min)
+    
+    #scheduler = StepLR(base_optimizer, args.learning_rate, args.epochs)
+    #rho_scheduler = LinearScheduler(T_max=args.epochs*len(dataset.train), max_value=args.rho_max, min_value=args.rho_min)
+    
+    scheduler = CosineScheduler(T_max=args.epochs*len(dataset.train), max_value=args.learning_rate, min_value=0.0, optimizer=base_optimizer)
+    rho_scheduler = CosineScheduler(T_max=args.epochs*len(dataset.train), max_value=args.rho_max, min_value=args.rho_min)
+    
     optimizer = GSAM(params=model.parameters(), base_optimizer=base_optimizer, model=model, gsam_alpha=args.alpha, rho_scheduler=rho_scheduler, adaptive=args.adaptive)
     for epoch in range(args.epochs):
         model.train()
@@ -77,7 +82,7 @@ if __name__ == "__main__":
             with torch.no_grad():
                 correct = torch.argmax(predictions.data, 1) == targets
                 log(model, loss.cpu().repeat(args.batch_size), correct.cpu(), scheduler.lr())
-                scheduler(epoch)
+                scheduler.step()
                 optimizer.update_rho_t()
 
         model.eval()
