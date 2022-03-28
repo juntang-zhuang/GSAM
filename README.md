@@ -115,7 +115,7 @@ rho_scheduler = ProportionScheduler(pytorch_lr_scheduler=lr_scheduler, max_lr=ar
 
 ### Case 2 (write your own scheduler)
 1) You can also write your own shceduler by inherit ```gsam.scheduler.SchedulerBase``` class and define ```step_func```.
-2) You can write your own lr scheduler by inheriting ```torch.optim.lr_scheduler._LRScheduler```, or combining several schedulers using ```torch.optim.lr_scheduler.SequentialLR```. After creating your own lr_scheduler, call ```gsam.ProportionScheduler```.
+2) You can write your own lr scheduler by inheriting ```torch.optim.lr_scheduler._LRScheduler```, or combining several schedulers using ```torch.optim.lr_scheduler.SequentialLR```. After creating your own lr_scheduler, call ```gsam.ProportionScheduler``` to create ```rho_scheduler```.
 
 ## Citation
 ```
