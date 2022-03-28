@@ -38,14 +38,24 @@ from gsam import GSAM, LinearScheduler
 # Step 0): set up base optimizer, e.g. SGD, Adam, AdaBelief ...
 +base_optimizer = torch.optim.SGD(model.parameters(), lr=args.learning_rate, momentum=args.momentum, weight_decay=args.weight_decay)
 
-# Step 1): set up learning rate scheduler. 
+# Step 1): set up learning rate scheduler. See [below](https://github.com/juntang-zhuang/GSAM/edit/main/README.md#notes-on-rho_scheduler)
 # If you pass base_optimizer to lr_scheduler, lr_scheduler.step() will update lr for all trainable parameters in base_optimizer. 
 # Otherwise, it only returns the value, and you need to manually assign lr to parameters in base_optimizer.
-# Currently LinearScheduler, CosineScheduler and PolyScheduler are implemented, all have support for warmup and user-specified min value.
-# An "ProportionScheduler" class is also implemented, such that you can use any scheduler inherited from torch.optim.lr_scheduler, and it will scale "rho_t" proportionally to "lr".
+# Currently LinearScheduler, CosineScheduler and PolyScheduler are re-implemented, all have support for warmup and user-specified min value.
+# You can also use torch.optim.lr_scheduler to adjust learning rate, however, in this case, it's recommended to use PropotioanScheduler for rho_t.
+
 +lr_scheduler = LinearScheduler(T_max=args.epochs*len(dataset.train), max_value=args.learning_rate, min_value=args.learning_rate*0.01, optimizer=base_optimizer)
 
 # Step 2): set up rho_t scheduler. 
+# There are two ways to set up rho_t decays proportional to lr, e.g. (lr - lr_min) / (lr_max - lr_min) = (rho - rho_min) / (rho_max - rho_min)
+#
+# Method a), call same scheduler twice with different ```max_value``` and ```min_value```:
+#            lr_scheduler = CosineScheduler(T_max=args.epochs*len(dataset.train), max_value=args.learning_rate, min_value=args.learning_rate*0.01, optimizer=base_optimizer)
+#            rho_scheduler = CosineScheduler(T_max=args.epochs*len(dataset.train), max_value=args.rho_max, min_value=args.rho_min)
+#
+# Method b), call the ```ProportionScheduler``` class:
+#            lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(base_optimizer, T_max, eta_min=0, last_epoch=- 1, verbose=False)
+#            rho_scheduler = PropotionScheduler(lr_scheduler, max_lr=args.learning_rate, min_lr=args.min_lr, max_value=args.rho_max, min_value=args.rho_min)
 +rho_scheduler = LinearScheduler(T_max=args.epochs*len(dataset.train), max_value=args.rho_max, min_value=args.rho_min)
 
 # Step 3): configure GSAM
