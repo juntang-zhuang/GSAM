@@ -10,7 +10,6 @@ from utility.step_lr import StepLR
 from utility.bypass_bn import enable_running_stats, disable_running_stats
 
 import sys; sys.path.append("..")
-from sam import SAM
 from gsam import GSAM, LinearScheduler, CosineScheduler
 
 
@@ -25,9 +24,9 @@ if __name__ == "__main__":
     parser.add_argument("--learning_rate", default=0.1, type=float, help="Base learning rate at the start of the training.")
     parser.add_argument("--momentum", default=0.9, type=float, help="SGD Momentum.")
     parser.add_argument("--threads", default=8, type=int, help="Number of CPU threads for dataloaders.")
-    parser.add_argument("--rho_max", default=2.0, type=int, help="Rho parameter for SAM.")
-    parser.add_argument("--rho_min", default=2.0, type=int, help="Rho parameter for SAM.")
-    parser.add_argument("--alpha", default=0.2, type=int, help="Rho parameter for SAM.")
+    parser.add_argument("--rho_max", default=2.0, type=int, help="Rho_max parameter for GSAM.")
+    parser.add_argument("--rho_min", default=2.0, type=int, help="Rho_min parameter for GSAM.")
+    parser.add_argument("--alpha", default=0.2, type=int, help="Alpha parameter for GSAM.")
     parser.add_argument("--weight_decay", default=0.0005, type=float, help="L2 weight decay.")
     parser.add_argument("--width_factor", default=8, type=int, help="How many times wider compared to normal ResNet.")
     args = parser.parse_args()
