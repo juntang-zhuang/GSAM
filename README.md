@@ -55,30 +55,30 @@ from gsam import GSAM, LinearScheduler
 for batch in dataset.train:
     inputs, targets = (b.cuda() for b in batch)
     
-    # Step 4): Define loss function, so that loss_fn only takes two inputs (predictions, targets), and outputs a scalar valued loss.
+    # Step 4): Upate lr and rho_t
++   lr_scheduler.step()
++   gsam_optimizer.update_rho_t()
+    
+    # Step 5): Define loss function, so that loss_fn only takes two inputs (predictions, targets), and outputs a scalar valued loss.
     # If you have auxialliary parameters e.g. arg1, arg2, arg3 ..., please define as:
     #           loss_fn = lambda predictions, targets: original_loss_func(predictions, targets, arg1=arg1, arg2=arg2, arg3=arg3 ...)
     
 +   def loss_fn(predictions, targets):
 +       return smooth_crossentropy(predictions, targets, smoothing=args.label_smoothing).mean()
     
-    # Step 5): Set closure, GSAM automatically sets the closure as
+    # Step 6): Set closure, GSAM automatically sets the closure as
     #            predictions = model(inputs), loss = loss_fn(predictions, targets), loss.backward()
     # Note: need to set_closure for each (inputs, targets) pair
     
 +   gsam_optimizer.set_closure(loss_fn, inputs, targets)
     
-    # Step 6): Update model parameters. 
+    # Step 7): Update model parameters. 
     # optimizer.step() internally does the following: 
     #            (a) zero grad (b) get gradients (c) get rho_t from rho_scheduler (d) perturb weights (e) zero grad (f) get gradients at perturbed location
     #            (g) decompose gradients and update gradients (h) apply new gradients with base_optimizer
     # Note: zero_grad is called internally for every step of GSAM.step(), gradient accumulation is currently not supported
     
 +   predictions, loss = gsam_optimizer.step()
-
-    # Step 7): Upate lr and rho_t
-+   lr_scheduler.step()
-+   gsam_optimizer.update_rho_t()
 # ============================================================================================
 ```
 
