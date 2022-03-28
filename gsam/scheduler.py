@@ -20,12 +20,14 @@ class ProportionScheduler:
         "if `max_lr==min_lr` hence `lr` is constant with step, please set 'max_value == min_value' so 'value' is constant with step."
     
         assert max_value >= min_value
-        
-        assert hasattr(pytorch_lr_scheduler, "_last_lr"), "pytorch_lr_scheduler must have a function named `_last_lr` to return current lr value."
-        
+                
     def step(self):
         self.t += 1
-        lr = self.pytorch_lr_scheduler._last_lr[0]
+        if hasattr(self.pytorch_lr_scheduler, "_last_lr"):
+            lr = self.pytorch_lr_scheduler._last_lr[0]
+        else:
+            lr = self.pytorch_lr_scheduler.optimizer.param_groups[0]['lr']
+            
         if self.max_lr > self.min_lr:
             value = self.min_value + (self.max_value - self.min_value) * (lr - self.min_lr) / (self.max_lr - self.min_lr)
         else:
