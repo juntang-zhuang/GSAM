@@ -113,11 +113,7 @@ lr_scheduler = CosineAnnealingLR(optimizer=base_optimizer, T_max=args.epochs*len
 rho_scheduler = ProportionScheduler(pytorch_lr_scheduler=lr_scheduler, max_lr=args.learning_rate, min_lr=args.learning_rate*0.01, max_value=args.rho_max, min_value=args.rho_min)
 ```
 
-### Case 2 (used in this toy repo, not recommended for large-scale experiments) 
-This is used in ```example/train.py```, the lr scheduler is a StepScheduler (to match previous results by https://github.com/davda54/sam ),
-the rho_t sheduler is a linear decayed scheduler. lr and rho_t do not decay proportionally.
-
-### Case 3 (write your own scheduler)
+### Case 2 (write your own scheduler)
 1) You can also write your own shceduler by inherit ```gsam.scheduler.SchedulerBase``` class and define ```step_func```.
 2) You can write your own lr scheduler by inheriting ```torch.optim.lr_scheduler._LRScheduler```, or combining several schedulers using ```torch.optim.lr_scheduler.SequentialLR```. After creating your own lr_scheduler, call ```gsam.ProportionScheduler```.
 
