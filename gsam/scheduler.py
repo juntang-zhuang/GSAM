@@ -25,7 +25,7 @@ class ProportionScheduler:
         
     def step(self):
         self.t += 1
-        lr = self.pytorch_lr_scheduler._last_lr
+        lr = self.pytorch_lr_scheduler._last_lr[0]
         if self.max_lr > self.min_lr:
             value = self.min_value + (self.max_value - self.min_value) * (lr - self.min_lr) / (self.max_lr - self.min_lr)
         else:
