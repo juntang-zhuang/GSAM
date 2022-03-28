@@ -60,7 +60,8 @@ for batch in dataset.train:
         
     # Step 4): Define loss function, so that loss_fn only takes two inputs (predictions, targets), and outputs a scalar valued loss.
     # If you have auxialliary parameters e.g. arg1, arg2, arg3 ..., please define as:
-    #           loss_fn = lambda predictions, targets: original_loss_func(predictions, targets, arg1=arg1, arg2=arg2, arg3=arg3 ...)
+    #           criterion = nn.CrossEntropyLoss()
+    #           loss_fn = lambda predictions, targets: criterion(predictions, targets, arg1=arg1, arg2=arg2, arg3=arg3 ...)
     
 +   def loss_fn(predictions, targets):
 +       return smooth_crossentropy(predictions, targets, smoothing=args.label_smoothing).mean()
