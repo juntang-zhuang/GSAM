@@ -42,6 +42,7 @@ from gsam import GSAM, LinearScheduler
 # If you pass base_optimizer to lr_scheduler, lr_scheduler.step() will update lr for all trainable parameters in base_optimizer. 
 # Otherwise, it only returns the value, and you need to manually assign lr to parameters in base_optimizer.
 # Currently LinearScheduler, CosineScheduler and PolyScheduler are implemented, all have support for warmup and user-specified min value.
+# An "ProportionScheduler" class is also implemented, such that you can use any scheduler inherited from torch.optim.lr_scheduler, and it will scale "rho_t" proportionally to "lr".
 +lr_scheduler = LinearScheduler(T_max=args.epochs*len(dataset.train), max_value=args.learning_rate, min_value=args.learning_rate*0.01, optimizer=base_optimizer)
 
 # Step 2): set up rho_t scheduler. 
