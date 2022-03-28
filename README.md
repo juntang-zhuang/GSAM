@@ -18,7 +18,7 @@ Please feel free to create a PR if you are an expert on this.
 ## Algorithm and results on ImageNet in the paper
 ![](img/gsam_algo2.png)
 ![](img/gsam_results.png)
-![](img/gsam_hyperparam.png)
+![](img/gsam_hyperparam2.png)
 ## How to use GSAM in code
 For readability the essential code is highlighted (at a cost of an extra "+" sign at the beginning of line). Please ***remove the beginning "+"*** when using GSAM in your project. Each step of code is marked with notes, please read before using.
 
