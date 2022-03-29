@@ -7,7 +7,7 @@ Disclaimer: original code (during internship at Google) was in jax and tensorflo
 Acknowledgement: This repository is based on https://github.com/davda54/sam 
 
 ## (Potentially) Unresolved issues with PyTorch code on per-worker unsynchronized gradient and weight perturbation
-Since the SAM family works best when```each worker has its own (different) gradient and weight puerturbation```, but in DataParallel mode in PyTorch the gradient is synchronized across workers hence perturbation is also synchronized across workers.
+Since the SAM family works best when```each worker has its own (different) gradient and weight perturbation```, but in DataParallel mode in PyTorch the gradient is synchronized across workers hence perturbation is also synchronized across workers.
 
 In order to let each worker use its own gradient, I use ```model.no_sync()``` in the [code](https://github.com/juntang-zhuang/GSAM/blob/bab6bbe65612d6080f522870b9dd79f5957882d6/gsam/gsam.py#L160), perform the gradient decomposition in GSAM for each worker separately, then synchronize the <img src="https://latex.codecogs.com/svg.latex?&space;\nabla{f}^{GSAM}" />
  [here](https://github.com/juntang-zhuang/GSAM/blob/bab6bbe65612d6080f522870b9dd79f5957882d6/gsam/gsam.py#L180) before feeding it to the base optimizer. However, I'm not sure if ```model.no_sync()``` only works in ```DistributedDataParallel``` mode but not in ```DataParallel``` mode. 
