@@ -12,7 +12,7 @@ Since the SAM family works best when```each worker has its own (different) gradi
 In order to let each worker use its own gradient, I use ```model.no_sync()``` in the [code](https://github.com/juntang-zhuang/GSAM/blob/bab6bbe65612d6080f522870b9dd79f5957882d6/gsam/gsam.py#L160), perform the gradient decomposition in GSAM for each worker separately, then synchronize the <img src="https://latex.codecogs.com/svg.latex?&space;\nabla{f}^{GSAM}" />
  [here](https://github.com/juntang-zhuang/GSAM/blob/bab6bbe65612d6080f522870b9dd79f5957882d6/gsam/gsam.py#L180) before feeding it to the base optimizer. However, I'm not sure if ```model.no_sync()``` only works in ```DistributedDataParallel``` mode but not in ```DataParallel``` mode. 
 
-I suppose the training script needs to be set as ```Distributed``` in order to replicate my experiments with Jax, but I have quite limited experimence with PyTorch distributed training.
+I suppose the training script needs to be set as ```DistributedDataParallel``` in order to replicate my experiments with Jax, but I have quite limited experimence with PyTorch distributed training.
 Please feel free to create a PR if you are an expert on this.
 
 ## Algorithm and results on ImageNet in the paper
