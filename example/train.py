@@ -10,7 +10,8 @@ from utility.step_lr import StepLR
 from utility.bypass_bn import enable_running_stats, disable_running_stats
 
 import sys; sys.path.append("..")
-from gsam import GSAM, LinearScheduler, CosineScheduler
+from sam import SAM
+from gsam import GSAM, LinearScheduler, CosineScheduler, ProportionScheduler
 
 
 if __name__ == "__main__":
@@ -24,9 +25,9 @@ if __name__ == "__main__":
     parser.add_argument("--learning_rate", default=0.1, type=float, help="Base learning rate at the start of the training.")
     parser.add_argument("--momentum", default=0.9, type=float, help="SGD Momentum.")
     parser.add_argument("--threads", default=8, type=int, help="Number of CPU threads for dataloaders.")
-    parser.add_argument("--rho_max", default=2.0, type=int, help="Rho_max parameter for GSAM.")
-    parser.add_argument("--rho_min", default=2.0, type=int, help="Rho_min parameter for GSAM.")
-    parser.add_argument("--alpha", default=0.2, type=int, help="Alpha parameter for GSAM.")
+    parser.add_argument("--rho_max", default=2.0, type=int, help="Rho parameter for SAM.")
+    parser.add_argument("--rho_min", default=2.0, type=int, help="Rho parameter for SAM.")
+    parser.add_argument("--alpha", default=0.4, type=int, help="Rho parameter for SAM.")
     parser.add_argument("--weight_decay", default=0.0005, type=float, help="L2 weight decay.")
     parser.add_argument("--width_factor", default=8, type=int, help="How many times wider compared to normal ResNet.")
     args = parser.parse_args()
@@ -50,7 +51,8 @@ if __name__ == "__main__":
     #rho_scheduler = LinearScheduler(T_max=args.epochs*len(dataset.train), max_value=args.rho_max, min_value=args.rho_min)
     
     scheduler = CosineScheduler(T_max=args.epochs*len(dataset.train), max_value=args.learning_rate, min_value=0.0, optimizer=base_optimizer)
-    rho_scheduler = CosineScheduler(T_max=args.epochs*len(dataset.train), max_value=args.rho_max, min_value=args.rho_min)
+    rho_scheduler = ProportionScheduler(pytorch_lr_scheduler=scheduler, max_lr=args.learning_rate, min_lr=0.0,
+ max_value=args.rho_max, min_value=args.rho_min)
     
     optimizer = GSAM(params=model.parameters(), base_optimizer=base_optimizer, model=model, gsam_alpha=args.alpha, rho_scheduler=rho_scheduler, adaptive=args.adaptive)
     for epoch in range(args.epochs):
