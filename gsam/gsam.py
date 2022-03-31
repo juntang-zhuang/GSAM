@@ -4,7 +4,9 @@ import contextlib
 from torch.distributed import ReduceOp
 
 class GSAM(torch.optim.Optimizer):
-    def __init__(self, params, base_optimizer, model, gsam_alpha, rho_scheduler, adaptive=False, perturb_eps=1e-12, grad_reduce='mean', **kwargs):
+    def __init__(self, params, base_optimizer, model, gsam_alpha, rho_scheduler, adaptive=False, perturb_eps=1e-12, grad_reduce='mean', 
+                scaler=None, amp=False, **kwargs):
+
         defaults = dict(adaptive=adaptive, **kwargs)
         super(GSAM, self).__init__(params, defaults)
         self.model = model
@@ -14,7 +16,9 @@ class GSAM(torch.optim.Optimizer):
         self.rho_scheduler = rho_scheduler
         self.perturb_eps = perturb_eps
         self.alpha = gsam_alpha
-        
+        self.scaler = scaler
+        self.amp = amp
+
         # initialize self.rho_t
         self.update_rho_t()
         
@@ -141,10 +145,15 @@ class GSAM(torch.optim.Optimizer):
         def get_grad():
             self.base_optimizer.zero_grad()
             with torch.enable_grad():
-                outputs = self.model(inputs)
-                loss = loss_fn(outputs, targets, **kwargs)
+                with torch.cuda.amp.autocast(self.amp):
+                    outputs = self.model(inputs)
+                    loss = loss_fn(outputs, targets, **kwargs)
             loss_value = loss.data.clone().detach()
-            loss.backward()
+            if self.scaler is not None:
+                scaler.scale(loss).backward()
+                scaler.update() # Should the scaling factor update be made here 
+            else:
+                loss.backward()
             return outputs, loss_value
 
         self.forward_backward_func = get_grad
@@ -180,7 +189,11 @@ class GSAM(torch.optim.Optimizer):
         self._sync_grad()    
 
         # update with new directions
-        self.base_optimizer.step()
+        if self.scaler is not None:
+            self.scaler.step(self.base_optimizer)
+            # self.scaler.update() or here ? 
+        else:
+            self.base_optimizer.step()
 
         # enable running stats
         enable_running_stats(self.model)
