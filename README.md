@@ -2,7 +2,11 @@
 <h3 align="center"><b>Surrogate Gap Guided Sharpness-Aware Minimization </b></h3>
 <a href="https://openreview.net/pdf?id=edONMAnhLu-" a> [Paper, ICLR 2022]</a>   <a href="https://sites.google.com/view/gsam-iclr22/home" a> [Webpate] </a>
 
-Disclaimer: original code (during internship at Google) was in jax and tensorflow and is planned to be released with Keras. This repository is a re-implmentation in PyTorch tested only on a Cifar10 experiment, not tested by reproduction of results in the paper
+Official implementation in jax: https://github.com/google-research/big_vision/tree/main/big_vision/trainers/proj/gsam 
+
+Discussion on reproducing results with jax code: https://github.com/google-research/big_vision/pull/8
+
+Disclaimer: This repository is a re-implmentation in PyTorch tested only on a Cifar10 experiment, not tested by reproduction of results in the paper.
 
 Acknowledgement: This repository is based on https://github.com/davda54/sam 
 
